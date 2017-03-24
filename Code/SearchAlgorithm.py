@@ -394,5 +394,95 @@ def AstarAlgorithm(stationList, coord_origin, coord_destination, typePreference,
             min_distance_destination
     """
 
+    TraveledList = []
+    # Lista con los nodos de origen
+    OriginList = []
+    # Lista con los nodos de destino
+    DestList = []
+    #numero de nodos Expand
+    exp_nodes=0
+    #Lista con todos los paths
+    Paths = []
+
+    # Set de las estaciones mas cercanas para saber cuales tiene que visitar
+    ClosestToOrigin = coord2station(coord_origin, stationList)
+    ClosestToDest = coord2station(coord_destination, stationList)
+
+    # Set de costTable para la funcion Expand
+    costTable = setCostTable(typePreference, stationList, city)
+
+    # Guardamos en originList los nodos de las mas cercanas para poderlos recorrer y obtener sus valores
+    # Params: estacion y padre
+    for closeOrigin in ClosestToOrigin:
+        OriginList.append(Node(stationList[closeOrigin], None))
+
+    for closeDest in ClosestToDest:
+        DestList.append(Node(stationList[closeDest], None))
+
+        # Para cada nodo de origen cercano, calcularemos los parametros de cada destinacion posible
+    for originNode in OriginList:
+        for destNode in DestList:
+            visitedNodes = []
+            evaluatedNodes = []
+            evaluatedNodes.append(originNode)
+            evaluatedNodes.append(originNode.f)
+            TraveledList.append(evaluatedNodes)
+
+            while originNode.station.name != destNode.station.name:
+                print originNode
+                visitedNodes.append(originNode.station.id)
+                actualNode =Expand(originNode, stationList, typePreference, DestList[0], costTable, city)
+                actualNode = RemoveCycles(actualNode)
+
+                for actual in actualNode:
+                    evaluatedNodes = []
+                    evaluatedNodes.append(actual)
+                    evaluatedNodes.append(actual.f)
+                    TraveledList.append(evaluatedNodes)
+                TraveledList[1].pop(0)
+
+                originNode = TraveledList[0]
+                exp_nodes += 1
+
+            visitedNodes.append(originNode.station.id)
+
+            optimalPath = []
+
+            optimalPath.append(originNode.station.id)
+
+            time = originNode.time
+            distance = originNode.walk
+            transfers = originNode.transfers
+            stopStations = originNode.num_stopStation
+            min_distance_origin = sqrt(((originNode.station.x - coord_origin[0])**2) + ((originNode.station.y - coord_origin[1])**2))
+            min_distance_destination = sqrt(((destNode.station.x - coord_destination[0])**2) + ((destNode.station.y - coord_destination[1])**2))
+
+            optimalPath.reverse()
+            depth = len(optimalPath)
+            Path = []
+            Path.append(time)
+            Path.append(distance)
+            Path.append(transfers)
+            Path.append(stopStations)
+            Path.append(exp_nodes)
+            Path.append(depth)
+            Path.append(visitedNodes)
+            Path.append(optimalPath)
+            Path.append(min_distance_origin)
+            Path.append(min_distance_destination)
+            Paths.append(Path)
+
+            if typePreference is 1:
+                finalWay = Paths[0]
+            elif typePreference is 2:
+                finalWay = Paths[1]
+            elif typePreference is 3:
+                finalWay = Paths[2]
+            elif typePreference is 4:
+                finalWay = Paths[3]
+            else:
+                finalWay = Paths[0]
+
+            return finalWay
 
 
