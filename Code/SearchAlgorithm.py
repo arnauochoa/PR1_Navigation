@@ -22,7 +22,7 @@ class Node:
                 - station: STATION information of the Station of this Node
                 - father: NODE (see Node definition) of his father
         """
-        
+
         self.station = station      # STATION information of the Station of this Node
         self.g = 0                  # REAL cost - depending on the type of preference -
                                     # to get from the origin to this Node
@@ -42,8 +42,8 @@ class Node:
                                     # [optional] Only useful for GUI
         self.transfers = 0          # INTEGER number of transfers made from the origin to this Node
                                     # [optional] Only useful for GUI
-        
-    
+
+
     def getDistance(self, origin, destination):
         """
         getDistance: Calculates the Euclidean distance between two stations
@@ -54,7 +54,7 @@ class Node:
                 - distance: INTEGER. The minimum distance between origin and destination        
         """
         distance = sqrt((destination.x - origin.x)**2 + (destination.y - origin.y)**2)
-        
+
         return distance
 
 
@@ -113,7 +113,7 @@ class Node:
                     if self.father.station.id is station:
                         for ad_station in costTable[station]:
                             if ad_station is self.station.id:
-                                self.g = self.father.g + costTable[station][ad_station] 
+                                self.g = self.father.g + costTable[station][ad_station]
             else:
                 for station in costTable:
                     if self.father.station.id is station:
@@ -122,7 +122,7 @@ class Node:
                                 self.g = costTable[station][ad_station]
         else:
             self.g = 0
- 
+
 
 def Expand(fatherNode, stationList, typePreference, node_destination, costTable,city):
     """
@@ -144,12 +144,12 @@ def Expand(fatherNode, stationList, typePreference, node_destination, costTable,
                 - childrenList:  LIST of the set of child Nodes for this current node (fatherNode)
 
     """
-    
+
     childrenList = []
 
-    for i in stationList:
-        if fatherNode.station.destinationDic.has_key(i.id):
-            child = Node(i,fatherNode)
+    for station in stationList:
+        if station.id in fatherNode.station.destinationDic:
+            child = Node(station, fatherNode)
             child.setHeuristic(typePreference, node_destination, city)
             child.setRealCost(costTable)
             child.setEvaluation()
@@ -166,10 +166,10 @@ def RemoveCycles(childrenList):
         :returns
                 - listWithoutCycles:  LIST of the set of child Nodes for a certain Node which not includes cycles
     """
-    
+
     listWithoutCycles = childrenList
     repeatedNodes = []
-    
+
     for child in listWithoutCycles:
         father = child.father
         while father is not None:
@@ -188,7 +188,7 @@ def RemoveCycles(childrenList):
         if child in repeatedNodes:
             listWithoutCycles.remove(child)
     """
-    
+
     return listWithoutCycles
 
 
@@ -210,7 +210,7 @@ def RemoveRedundantPaths(childrenList, nodeList, partialCostTable):
     """
 
     auxList = childrenList[:]
-    
+
     for child in childrenList:
         if partialCostTable.has_key(child.station.id):
             if child.g < partialCostTable[child.station.id]:
@@ -224,11 +224,11 @@ def RemoveRedundantPaths(childrenList, nodeList, partialCostTable):
                         auxList.remove(child)
         else:
             partialCostTable.setdefault(child.station.id, child.g)
-    
+
     childrenList = auxList
-    
+
     return childrenList, nodeList, partialCostTable
-    
+
 
 
 def sorted_insertion(nodeList,childrenList):
@@ -252,9 +252,9 @@ def sorted_insertion(nodeList,childrenList):
                     nodeList.insert(index, child)
             if child not in nodeList:
                 nodeList.append(child)
-                    
+
     return nodeList
-    
+
 
 def setCostTable( typePreference, stationList,city):
     """
@@ -310,7 +310,7 @@ def setCostTable( typePreference, stationList,city):
                         costTable[i][j] = 0
                     else:
                         costTable[i][j] = 1
-    elif typePreference == 4:    
+    elif typePreference == 4:
         for i in city.adjacency.keys():
             for j in city.adjacency[i].keys():
                 if costTable.has_key(i):
@@ -339,11 +339,11 @@ def coord2station(coord, stationList):
             - possible_origins: List of the Indexes of the stationList structure, which corresponds to the closest
             station
     """
-    
+
     possible_origins = []
     bestDistance = float('inf')
     closestStation = None
-    
+
     for station in stationList:
         distance = sqrt((station.x - coord[0])**2 + (station.y - coord[1])**2)
         if distance < bestDistance:
@@ -353,7 +353,7 @@ def coord2station(coord, stationList):
     for station in stationList:
         if closestStation.name == station.name:
             possible_origins.append(station.id - 1)
-    
+
     return possible_origins
 
 
